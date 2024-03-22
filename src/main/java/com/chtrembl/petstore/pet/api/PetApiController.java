@@ -3,11 +3,15 @@ package com.chtrembl.petstore.pet.api;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.chtrembl.petstore.pet.entity.StatusEnum;
+import com.chtrembl.petstore.pet.model.Category;
+import com.chtrembl.petstore.pet.repository.PetRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -49,12 +53,7 @@ public class PetApiController implements PetApi {
 	private ContainerEnvironment containerEnvironment;
 
 	@Autowired
-	private DataPreload dataPreload;
-
-	@Override
-	public DataPreload getBeanToBeAutowired() {
-		return dataPreload;
-	}
+	private PetRepository petRepository;
 
 	@org.springframework.beans.factory.annotation.Autowired
 	public PetApiController(ObjectMapper objectMapper, NativeWebRequest request) {
@@ -99,8 +98,17 @@ public class PetApiController implements PetApi {
 			PetApiController.log.info(String.format(
 					"PetStorePetService incoming GET request to petstorepetservice/v2/pet/findPetsByStatus?status=%s",
 					status));
+
+			List<StatusEnum> statusEnums = status.stream()
+												 .map(StatusEnum::fromValue)
+												 .toList();
+
+			List<com.chtrembl.petstore.pet.entity.Pet> pets = petRepository.findByStatusIn(statusEnums);
+			
+			List<Pet> petDtos = toPetDtos(pets);
+			
 			try {
-				String petsJSON = new ObjectMapper().writeValueAsString(this.getPreloadedPets());
+				String petsJSON = new ObjectMapper().writeValueAsString(petDtos);
 				ApiUtil.setResponse(request, "application/json", petsJSON);
 				return new ResponseEntity<>(HttpStatus.OK);
 			} catch (JsonProcessingException e) {
@@ -111,6 +119,29 @@ public class PetApiController implements PetApi {
 		}
 
 		return new ResponseEntity<List<Pet>>(HttpStatus.NOT_IMPLEMENTED);
+	}
+
+	private List<Pet> toPetDtos(List<com.chtrembl.petstore.pet.entity.Pet> petEntities) {
+		List<Pet> petDtos = new ArrayList<>();
+		for (com.chtrembl.petstore.pet.entity.Pet petEntity : petEntities) {
+			Pet petDto = new Pet();
+			petDto.setId(petEntity.getId());
+			petDto.setName(petEntity.getName());
+			Category category = new Category();
+			category.setId(petEntity.getCategory().getId());
+			category.setName(petEntity.getCategory().getName());
+			petDto.setCategory(category);
+			petDto.setTags(petEntity.getTags().stream().map(tag -> {
+				com.chtrembl.petstore.pet.model.Tag tagDto = new com.chtrembl.petstore.pet.model.Tag();
+				tagDto.setId(tag.getId());
+				tagDto.setName(tag.getName());
+				return tagDto;
+			}).toList());
+			petDto.setPhotoURL(petEntity.getPhotoURL());
+			petDto.setStatus(Pet.StatusEnum.fromValue(petEntity.getStatus().getValue()));
+			petDtos.add(petDto);
+		}
+		return petDtos;
 	}
 
 	@Override
