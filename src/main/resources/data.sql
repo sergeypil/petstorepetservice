@@ -1,10 +1,10 @@
-insert into petstorepetservicedb.public.category (id, name)
+insert into public.category (id, name)
 values (1, 'Dog'),
        (2, 'Cat'),
        (3, 'Fish')
 ON CONFLICT DO NOTHING;
 
-insert into petstorepetservicedb.public.tag (id, name)
+insert into public.tag (id, name)
 values (1, 'doggie'),
        (2, 'large'),
        (3, 'small'),
@@ -12,7 +12,7 @@ values (1, 'doggie'),
        (5, 'fishy')
 ON CONFLICT DO NOTHING;
 
-insert into petstorepetservicedb.public.pet (id, name, category_id, photoURL, status)
+insert into public.pet (id, name, category_id, photoURL, status)
 values (1, 'Afador', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-breeds/afador.jpg?raw=true', 'available'),
        (2, 'American Bulldog', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-breeds/american-bulldog.jpg?raw=true', 'available'),
        (3, 'Australian Retriever', 1, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/dog-breeds/australian-retriever.jpg?raw=true', 'available'),
@@ -49,7 +49,7 @@ values (1, 'Afador', 1, 'https://raw.githubusercontent.com/chtrembl/staticconten
        (31, 'Goldfish', 3, 'https://raw.githubusercontent.com/chtrembl/staticcontent/master/fish-breeds/goldfish.jpg?raw=true', 'available')
 ON CONFLICT DO NOTHING;
 
-insert into petstorepetservicedb.public.pettag (pet_id, tag_id)
+insert into public.pettag (pet_id, tag_id)
 values
     (1, 1), (1, 2),
     (2, 1), (2, 2),
