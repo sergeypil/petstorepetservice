@@ -18,7 +18,7 @@ spring:
 #    password: postgres
     url: jdbc:postgresql://petstoreserver.postgres.database.azure.com:5432/petstorepetservicedb?ssl=true&sslmode=require
     username: postgres@petstoreserver
-    password: {$PETSTORESERVER_POSTGRES_PASSWORD}
+    password: ${PETSTORESERVER_POSTGRES_PASSWORD}
   jpa:
     show-sql: true
     hibernate:
